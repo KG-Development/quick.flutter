@@ -24,6 +24,10 @@
 #include <algorithm>
 #include <iomanip>
 
+#include <codecvt>
+#include <locale>
+#include <iostream>
+
 #define GUID_FORMAT "%08x-%04hx-%04hx-%02hhx%02hhx-%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx"
 #define GUID_ARG(guid) guid.Data1, guid.Data2, guid.Data3, guid.Data4[0], guid.Data4[1], guid.Data4[2], guid.Data4[3], guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7]
 
@@ -620,6 +624,10 @@ namespace
   winrt::fire_and_forget QuickBluePlugin::ConnectAsync(uint64_t bluetoothAddress)
   {
     auto device = co_await BluetoothLEDevice::FromBluetoothAddressAsync(bluetoothAddress);
+    if (!device) {
+        OutputDebugString((L"ConnectAsync null device! "+ std::to_wstring(bluetoothAddress) +L"\n").c_str());
+        co_return;
+    }
     auto servicesResult = co_await device.GetGattServicesAsync();
     if (servicesResult.Status() != GattCommunicationStatus::Success)
     {
